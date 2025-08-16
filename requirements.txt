@@ -1,0 +1,15 @@
+# Core dependencies
+numpy>=1.21.0
+pandas>=1.3.0
+treelib>=1.6.0
+
+# Optional optimization (genetic algorithm)
+geatpy>=2.7.0
+
+# Development dependencies
+pytest>=6.0.0
+black>=21.0.0
+flake8>=3.9.0
+
+# Platform dependencies
+rcabench_platform[v2]

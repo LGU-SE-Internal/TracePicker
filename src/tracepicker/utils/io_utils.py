@@ -4,6 +4,7 @@ import pickle
 from typing import Any
 
 from rcabench_platform.v2.logging import logger
+
 from .legacy_loader import load_legacy_pickle, setup_module_aliases
 
 
@@ -22,7 +23,7 @@ def load_pickle(file_path: str) -> Any:
     """
     # Set up module aliases for legacy compatibility
     setup_module_aliases()
-    
+
     try:
         # First try legacy loader for better compatibility
         data = load_legacy_pickle(file_path)
@@ -30,12 +31,14 @@ def load_pickle(file_path: str) -> Any:
         return data
     except Exception as e:
         logger.warning(f"Legacy loader failed for {file_path}: {e}")
-        
+
         # Fallback to standard pickle loading
         try:
             with open(file_path, "rb") as f:
                 data = pickle.load(f)
-            logger.info(f"Successfully loaded data from {file_path} using standard loader")
+            logger.info(
+                f"Successfully loaded data from {file_path} using standard loader"
+            )
             return data
         except FileNotFoundError:
             logger.error(f"File not found: {file_path}")

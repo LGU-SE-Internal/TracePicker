@@ -2,6 +2,8 @@
 
 TracePicker is an intelligent trace sampling framework for distributed systems that uses machine learning and optimization techniques to select representative traces while maintaining statistical properties of the original trace distribution.
 
+> **🚀 NEW**: TracePicker now supports modern parquet-based data formats and includes a modern CLI interface. See [README_NEW.md](README_NEW.md) for the latest features!
+
 ## Features
 
 - **Intelligent Sampling**: Uses path encoding and anomaly detection for smart trace selection
@@ -9,6 +11,33 @@ TracePicker is an intelligent trace sampling framework for distributed systems t
 - **Anomaly Detection**: Automatically identifies and prioritizes abnormal traces
 - **Configurable**: Flexible configuration options for different use cases
 - **Scalable**: Efficient buffer management and processing pipeline
+- **🆕 Modern Data Formats**: Full support for parquet files with Polars integration
+- **🆕 CLI Interface**: User-friendly command-line interface with rich output
+- **🆕 Platform Integration**: Compatible with rcabench platform standards
+
+## 🚀 Quick Start
+
+### Modern Interface (Recommended)
+
+```bash
+# Run with new parquet data format
+python main_new.py run /path/to/experiment/data --sample-rate 0.1
+
+# Show dataset information  
+python main_new.py info /path/to/experiment/data
+
+# Test CLI interface
+python test_real_data.py --help
+```
+
+### Legacy Interface
+
+```bash
+# Traditional pickle format
+python main.py --dataset A --data_dir TracePicker/data
+```
+
+For complete new features documentation, see **[README_NEW.md](README_NEW.md)**
 
 ## Architecture
 
@@ -29,9 +58,12 @@ The TracePicker framework consists of several key components:
 - **Quota Allocation**: Dynamic programming solution for optimal quota distribution
 - **Sample Optimization**: Genetic algorithm for trace selection optimization
 - **Input Schema**: Structured configuration and result formats
+- **🆕 Platform Adapter**: Integration with rcabench platform
 
 ### 4. Utilities (`src/tracepicker/utils/`)
 - **I/O Operations**: Pickle-based data loading and saving
+- **🆕 New Data Loader**: Polars-based parquet file processing
+- **🆕 Legacy Loader**: Backward compatibility for old formats
 - **Timing**: Performance measurement and profiling tools
 
 ## Installation

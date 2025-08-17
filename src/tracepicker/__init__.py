@@ -26,7 +26,23 @@ def __getattr__(name):
         from .algorithms.input_schema import TracingConfig
 
         return TracingConfig
+    elif name == "TracePickerAlgorithm":
+        from .algorithms.platform_adapter import TracePickerAlgorithm
+
+        return TracePickerAlgorithm
+    elif name == "tracepicker_algorithm":
+        from .algorithms.platform_adapter import tracepicker_algorithm
+
+        return tracepicker_algorithm
     raise AttributeError(f"module '{__name__}' has no attribute '{name}'")
 
 
-__all__ = ["TracePicker", "Trace", "Span", "TracingInput", "TracingConfig"]
+__all__ = [
+    "TracePicker",
+    "Trace",
+    "Span",
+    "TracingInput",
+    "TracingConfig",
+    "TracePickerAlgorithm",
+    "tracepicker_algorithm",
+]

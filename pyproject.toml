@@ -2,7 +2,7 @@
 name = "TracePicker"
 version = "0.1.0"
 requires-python = ">=3.12"
-description = "Add your description here"
+description = "TracePicker: Intelligent trace sampling for distributed systems"
 readme = "README.md"
 dependencies = [
     "treelib",
@@ -19,6 +19,9 @@ dependencies = [
     "dgl",
     "rcabench-platform>=0.3.26",
     "rcabench>=1.1.30",
+    "polars>=0.20.0",
+    "typer[all]>=0.9.0",
+    "rich>=13.0.0",
 ]
 [tool.uv.sources]
 geatpy = { url = "https://github.com/geatpy-dev/geatpy/releases/download/v2.7.0/geatpy-2.7.0-cp312-cp312-manylinux1_x86_64.whl" }

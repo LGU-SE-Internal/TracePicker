@@ -13,8 +13,8 @@ sys.path.insert(0, str(Path(__file__).parent / "src"))
 from tracepicker import run_tracepicker
 
 
-def test_tracepicker_with_stats():
-    """测试TracePicker的统计功能"""
+def benchmark_tracepicker():
+    """Benchmark TracePicker's statistical functionality"""
 
     # 数据路径 - 您需要替换为实际的数据路径
     data_path = Path("test/your-experiment-data-folder")
@@ -149,7 +149,7 @@ def test_tracepicker_with_stats():
 
 if __name__ == "__main__":
     try:
-        test_tracepicker_with_stats()
+        benchmark_tracepicker()
     except Exception as e:
-        print(f"❌ Test failed: {e}")
+        print(f"❌ Benchmark failed: {e}")
         sys.exit(1)

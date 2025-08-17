@@ -246,16 +246,23 @@ def polars_to_traces(df: pl.DataFrame) -> List[Trace]:
                 status_map = {0: 200, 1: 200, 2: 500}  # Unset, Ok, Error
                 status_code = status_map.get(row["attr.status_code"], 200)
 
-            # Handle parent_span_id - normalize various null/empty representations
+            # Handle parent_span_id carefully - preserve actual values
             parent_span_id = row.get("parent_span_id")
-            if (
-                parent_span_id is None
-                or str(parent_span_id).strip() == ""
-                or str(parent_span_id) == "null"
-            ):
+            original_parent_id = parent_span_id  # For debugging
+            if parent_span_id is None:
                 parent_span_id = ""
             else:
-                parent_span_id = str(parent_span_id)
+                parent_span_id = str(parent_span_id).strip()
+                # Only convert truly empty strings to ""
+                if parent_span_id == "null" or parent_span_id == "":
+                    parent_span_id = ""
+
+            # Debug logging for the specific trace mentioned
+            if str(actual_trace_id) == "9e08a3d2697dc074f5c9cf139949cc92":
+                logger.debug(
+                    f"Trace {actual_trace_id}, Span {row['span_id']}: "
+                    f"original_parent='{original_parent_id}' -> processed_parent='{parent_span_id}'"
+                )
 
             span = Span(
                 start_time=start_time,

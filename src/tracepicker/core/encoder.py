@@ -66,15 +66,22 @@ class BFSEncoder:
             # Add node to tree
             if span.is_root():
                 tree.create_node(tag=label, identifier=span.span_id)
+                logger.debug(
+                    f"Added root node: {span.span_id} (parent_span_id='{span.parent_span_id}')"
+                )
             else:
                 parent_span = span_lookup.get(span.parent_span_id)
                 if parent_span:
                     tree.create_node(
                         tag=label, identifier=span.span_id, parent=parent_span.span_id
                     )
+                    logger.debug(
+                        f"Added child node: {span.span_id} -> parent: {parent_span.span_id}"
+                    )
                 else:
                     logger.warning(
-                        f"Parent span {span.parent_span_id} not found for span {span.span_id}"
+                        f"Parent span '{span.parent_span_id}' not found for span '{span.span_id}'. "
+                        f"Available spans: {list(span_lookup.keys())}"
                     )
 
         # Check for performance degradation

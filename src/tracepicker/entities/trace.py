@@ -31,7 +31,7 @@ class Span:
             status_code: HTTP status code or similar
             trace_id: ID of the trace this span belongs to
             span_id: Unique ID of this span
-            parent_span_id: ID of the parent span, '-1' for root spans
+            parent_span_id: ID of the parent span, empty string "" for root spans (legacy: "-1")
             instance: Instance/node identifier
             service: Service name
             operation: Operation name
@@ -58,7 +58,7 @@ class Span:
 
     def is_root(self) -> bool:
         """Check if this is a root span."""
-        return self.parent_span_id == "-1"
+        return self.parent_span_id == "" or self.parent_span_id == "-1"
 
     @classmethod
     def from_record(cls, record: Dict[str, Any]) -> "Span":

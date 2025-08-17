@@ -252,7 +252,7 @@ def polars_to_traces(df: pl.DataFrame) -> List[Trace]:
                 status_code=status_code,
                 trace_id=str(actual_trace_id),
                 span_id=row["span_id"],
-                parent_span_id=row["parent_span_id"] or "-1",
+                parent_span_id=row["parent_span_id"] or "",
                 instance=row.get("attr.instance", "unknown"),
                 service=row["service_name"],
                 operation=row["span_name"],

@@ -58,7 +58,13 @@ class Span:
 
     def is_root(self) -> bool:
         """Check if this is a root span."""
-        return self.parent_span_id == "" or self.parent_span_id == "-1"
+        # Handle various formats for root spans
+        return (
+            self.parent_span_id == ""
+            or self.parent_span_id == "-1"
+            or self.parent_span_id is None
+            or str(self.parent_span_id).strip() == ""
+        )
 
     @classmethod
     def from_record(cls, record: Dict[str, Any]) -> "Span":
@@ -168,8 +174,11 @@ class Trace:
         # Check if there's exactly one root span
         root_spans = [span for span in self.spans if span.is_root()]
         if len(root_spans) != 1:
+            # Debug: log parent_span_id values for troubleshooting
+            parent_ids = [f"'{span.parent_span_id}'" for span in self.spans]
             logger.warning(
-                f"Trace {self.trace_id} has {len(root_spans)} root spans, expected 1"
+                f"Trace {self.trace_id} has {len(root_spans)} root spans, expected 1. "
+                f"Parent span IDs: {parent_ids}"
             )
 
     @property

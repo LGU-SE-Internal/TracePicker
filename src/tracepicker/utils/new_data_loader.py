@@ -246,13 +246,24 @@ def polars_to_traces(df: pl.DataFrame) -> List[Trace]:
                 status_map = {0: 200, 1: 200, 2: 500}  # Unset, Ok, Error
                 status_code = status_map.get(row["attr.status_code"], 200)
 
+            # Handle parent_span_id - normalize various null/empty representations
+            parent_span_id = row.get("parent_span_id")
+            if (
+                parent_span_id is None
+                or str(parent_span_id).strip() == ""
+                or str(parent_span_id) == "null"
+            ):
+                parent_span_id = ""
+            else:
+                parent_span_id = str(parent_span_id)
+
             span = Span(
                 start_time=start_time,
                 duration=duration_ms,
                 status_code=status_code,
                 trace_id=str(actual_trace_id),
                 span_id=row["span_id"],
-                parent_span_id=row["parent_span_id"] or "",
+                parent_span_id=parent_span_id,
                 instance=row.get("attr.instance", "unknown"),
                 service=row["service_name"],
                 operation=row["span_name"],

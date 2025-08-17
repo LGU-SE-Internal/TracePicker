@@ -257,8 +257,11 @@ def polars_to_traces(df: pl.DataFrame) -> List[Trace]:
                 if parent_span_id == "null" or parent_span_id == "":
                     parent_span_id = ""
 
-            # Debug logging for the specific trace mentioned
-            if str(actual_trace_id) == "9e08a3d2697dc074f5c9cf139949cc92":
+            # Debug logging for problematic traces
+            if str(actual_trace_id) in [
+                "9e08a3d2697dc074f5c9cf139949cc92",
+                "43f2a664cfcee2427c2f43619b8327c4",
+            ]:
                 logger.debug(
                     f"Trace {actual_trace_id}, Span {row['span_id']}: "
                     f"original_parent='{original_parent_id}' -> processed_parent='{parent_span_id}'"

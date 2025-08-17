@@ -46,7 +46,7 @@ class BFSEncoder:
         # Create span lookup
         span_lookup = {span.span_id: span for span in trace.spans}
 
-        # Build tree and collect statistics
+        # Two-pass approach: first add all spans to statistics, then build tree
         for span in trace.spans:
             label = span.span_label
 
@@ -59,30 +59,62 @@ class BFSEncoder:
             self.pool.add(label, span.duration)
             self.buffer_labels.append(label)
 
-            # Skip if node already exists
-            if tree.contains(span.span_id):
-                continue
+        # Build tree in proper order: roots first, then children
+        processed_spans = set()
 
-            # Add node to tree
-            if span.is_root():
+        # First pass: add all root nodes
+        for span in trace.spans:
+            if span.is_root() and span.span_id not in processed_spans:
+                label = span.span_label
                 tree.create_node(tag=label, identifier=span.span_id)
+                processed_spans.add(span.span_id)
                 logger.debug(
                     f"Added root node: {span.span_id} (parent_span_id='{span.parent_span_id}')"
                 )
-            else:
-                parent_span = span_lookup.get(span.parent_span_id)
-                if parent_span:
+
+        # Second pass: add children, retry until all are processed or no progress
+        max_iterations = len(trace.spans)  # Prevent infinite loops
+        iteration = 0
+
+        while len(processed_spans) < len(trace.spans) and iteration < max_iterations:
+            added_in_iteration = 0
+
+            for span in trace.spans:
+                if span.span_id in processed_spans:
+                    continue  # Already processed
+
+                if span.is_root():
+                    continue  # Should have been processed in first pass
+
+                # Check if parent exists in tree
+                if span.parent_span_id in processed_spans:
+                    label = span.span_label
                     tree.create_node(
-                        tag=label, identifier=span.span_id, parent=parent_span.span_id
+                        tag=label, identifier=span.span_id, parent=span.parent_span_id
                     )
+                    processed_spans.add(span.span_id)
+                    added_in_iteration += 1
                     logger.debug(
-                        f"Added child node: {span.span_id} -> parent: {parent_span.span_id}"
+                        f"Added child node: {span.span_id} -> parent: {span.parent_span_id}"
                     )
-                else:
+
+            if added_in_iteration == 0:
+                # No progress made, log remaining spans and break
+                remaining_spans = [
+                    s for s in trace.spans if s.span_id not in processed_spans
+                ]
+                logger.warning(
+                    f"Could not process {len(remaining_spans)} spans in trace {trace.trace_id}:"
+                )
+                for span in remaining_spans:
+                    parent_exists = span.parent_span_id in span_lookup
                     logger.warning(
-                        f"Parent span '{span.parent_span_id}' not found for span '{span.span_id}'. "
-                        f"Available spans: {list(span_lookup.keys())}"
+                        f"  Span {span.span_id} -> parent {span.parent_span_id} "
+                        f"(parent_exists: {parent_exists})"
                     )
+                break
+
+            iteration += 1
 
         # Check for performance degradation
         is_performance_degraded = actual_duration > expected_duration

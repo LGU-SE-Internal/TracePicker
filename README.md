@@ -21,20 +21,20 @@ TracePicker is an intelligent trace sampling framework for distributed systems t
 
 ```bash
 # Run with new parquet data format
-python main_new.py run /path/to/experiment/data --sample-rate 0.1
+python tracepicker_cli.py run /path/to/experiment/data --sample-rate 0.1
 
 # Show dataset information  
-python main_new.py info /path/to/experiment/data
+python tracepicker_cli.py info /path/to/experiment/data
 
 # Test CLI interface
-python test_real_data.py --help
+python benchmark.py --help
 ```
 
 ### Legacy Interface
 
 ```bash
-# Traditional pickle format
-python main.py --dataset A --data_dir TracePicker/data
+# Traditional pickle format (legacy)
+python eval.py --dataset A --data_dir data
 ```
 
 For complete new features documentation, see **[README_NEW.md](README_NEW.md)**
@@ -116,10 +116,10 @@ print(f"Processing time: {result.total_time:.2f}s")
 
 ```bash
 # Run with default settings
-python main.py --dataset A --data_dir TracePicker/data
+python eval.py --dataset A --data_dir data
 
 # Customize parameters
-python main.py \
+python eval.py \
     --dataset socialNetwork \
     --data_dir /path/to/data \
     --output_dir /path/to/output \

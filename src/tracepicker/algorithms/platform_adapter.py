@@ -13,11 +13,11 @@ from rcabench_platform.v2.logging import logger
 from ..algorithms.input_schema import TracingConfig
 from ..core.tracepicker import TracePicker
 from ..preprocessing.data_preprocessor import preprocess_raw_data
-from ..utils.new_data_loader import load_and_convert_traces
+from ..utils.data_loader import load_and_convert_traces
 from ..utils.result_saver import TracepickerResultSaver
 
 
-class TracesAdapter:
+class TracePickerAdapter:
     """Adapter for TracePicker to work with rcabench platform."""
 
     def __init__(
@@ -172,7 +172,7 @@ class TracesAdapter:
             raise
 
 
-def tracepicker_algorithm(
+def run_tracepicker(
     data_folder: Path,
     inject_time: Optional[int] = None,
     dataset: Optional[str] = None,
@@ -199,7 +199,7 @@ def tracepicker_algorithm(
     Returns:
         Dictionary with sampling results
     """
-    adapter = TracesAdapter(
+    adapter = TracePickerAdapter(
         buffer_size=buffer_size,
         sample_rate=sample_rate,
         pool_height=pool_height,
@@ -239,7 +239,7 @@ class TracePickerAlgorithm(Algorithm):
 
             # Create adapter with default parameters
             # These could be made configurable through args if needed
-            adapter = TracesAdapter(
+            adapter = TracePickerAdapter(
                 buffer_size=4000,
                 sample_rate=0.1,
                 pool_height=1000,

@@ -1,6 +1,6 @@
 """TracePicker: A trace sampling framework for distributed systems."""
 
-__version__ = "1.0.0"
+__version__ = "2.0.0"
 __author__ = "TracePicker Team"
 
 
@@ -30,11 +30,15 @@ def __getattr__(name):
         from .algorithms.platform_adapter import TracePickerAlgorithm
 
         return TracePickerAlgorithm
-    elif name == "tracepicker_algorithm":
-        from .algorithms.platform_adapter import tracepicker_algorithm
+    elif name == "TracePickerAdapter":
+        from .algorithms.platform_adapter import TracePickerAdapter
 
-        return tracepicker_algorithm
-    elif name == "TracepickerResultSaver":
+        return TracePickerAdapter
+    elif name == "run_tracepicker":
+        from .algorithms.platform_adapter import run_tracepicker
+
+        return run_tracepicker
+    elif name == "ResultSaver":
         from .utils.result_saver import TracepickerResultSaver
 
         return TracepickerResultSaver
@@ -48,6 +52,7 @@ __all__ = [
     "TracingInput",
     "TracingConfig",
     "TracePickerAlgorithm",
-    "tracepicker_algorithm",
-    "TracepickerResultSaver",
+    "TracePickerAdapter",
+    "run_tracepicker",
+    "ResultSaver",
 ]

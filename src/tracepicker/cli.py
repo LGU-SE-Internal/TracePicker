@@ -8,7 +8,7 @@ from rich.console import Console
 from rich.progress import Progress, SpinnerColumn, TextColumn
 from rich.table import Table
 
-from .algorithms.platform_adapter import tracepicker_algorithm
+from .algorithms.platform_adapter import run_tracepicker
 from .utils.new_data_loader import load_inject_time
 
 app = typer.Typer(
@@ -89,7 +89,7 @@ def run(
         ) as progress:
             task = progress.add_task("Running TracePicker...", total=None)
 
-            result = tracepicker_algorithm(
+            result = run_tracepicker(
                 data_folder=data_folder,
                 buffer_size=buffer_size,
                 sample_rate=sample_rate,

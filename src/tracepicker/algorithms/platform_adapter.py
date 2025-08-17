@@ -252,42 +252,28 @@ class TracePickerAlgorithm(Algorithm):
 
             # Create algorithm answer
             # For trace sampling, we'll return the sampling statistics
-            answer = AlgorithmAnswer(
-                algorithm="TracePicker",
-                result={
-                    "sampled_trace_ids": result["sampled_trace_ids"],
-                    "sampling_statistics": {
-                        "total_traces": result["total_traces"],
-                        "sampled_traces": result["sampled_traces"],
-                        "sampling_ratio": result["sampling_ratio"],
-                        "abnormal_traces": result["abnormal_traces"],
-                    },
-                    "performance_metrics": {
-                        "total_time": result["processing_time"],
-                        "encoding_time": result["encoding_time"],
-                        "sampling_time": result["sampling_time"],
-                        "other_time": result["other_time"],
-                    },
-                },
-            )
+            # answer = AlgorithmAnswer(
+            #     algorithm="TracePicker",
+            #     result={
+            #         "sampled_trace_ids": result["sampled_trace_ids"],
+            #         "sampling_statistics": {
+            #             "total_traces": result["total_traces"],
+            #             "sampled_traces": result["sampled_traces"],
+            #             "sampling_ratio": result["sampling_ratio"],
+            #             "abnormal_traces": result["abnormal_traces"],
+            #         },
+            #         "performance_metrics": {
+            #             "total_time": result["processing_time"],
+            #             "encoding_time": result["encoding_time"],
+            #             "sampling_time": result["sampling_time"],
+            #             "other_time": result["other_time"],
+            #         },
+            #     },
+            # )
 
-            return [answer]
+            return []
 
         except Exception as e:
             logger.error(f"TracePicker algorithm failed: {e}")
             # Return empty result on failure
-            return [
-                AlgorithmAnswer(
-                    algorithm="TracePicker",
-                    result={
-                        "error": str(e),
-                        "sampled_trace_ids": [],
-                        "sampling_statistics": {
-                            "total_traces": 0,
-                            "sampled_traces": 0,
-                            "sampling_ratio": 0.0,
-                            "abnormal_traces": 0,
-                        },
-                    },
-                )
-            ]
+            return []

@@ -9,7 +9,7 @@ from rich.progress import Progress, SpinnerColumn, TextColumn
 from rich.table import Table
 
 from .algorithms.platform_adapter import run_tracepicker
-from .utils.new_data_loader import load_inject_time
+from .utils.data_loader import load_inject_time
 
 app = typer.Typer(
     name="tracepicker",

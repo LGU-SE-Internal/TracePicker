@@ -4,10 +4,11 @@ import pickle
 from typing import Any
 
 from rcabench_platform.v2.logging import logger
+from .legacy_loader import load_legacy_pickle, setup_module_aliases
 
 
 def load_pickle(file_path: str) -> Any:
-    """Load data from a pickle file.
+    """Load data from a pickle file with legacy compatibility.
 
     Args:
         file_path: Path to the pickle file
@@ -19,17 +20,29 @@ def load_pickle(file_path: str) -> Any:
         FileNotFoundError: If file doesn't exist
         pickle.PickleError: If file cannot be unpickled
     """
+    # Set up module aliases for legacy compatibility
+    setup_module_aliases()
+    
     try:
-        with open(file_path, "rb") as f:
-            data = pickle.load(f)
-        logger.info(f"Successfully loaded data from {file_path}")
+        # First try legacy loader for better compatibility
+        data = load_legacy_pickle(file_path)
+        logger.info(f"Successfully loaded data from {file_path} using legacy loader")
         return data
-    except FileNotFoundError:
-        logger.error(f"File not found: {file_path}")
-        raise
-    except pickle.PickleError as e:
-        logger.error(f"Failed to unpickle file {file_path}: {e}")
-        raise
+    except Exception as e:
+        logger.warning(f"Legacy loader failed for {file_path}: {e}")
+        
+        # Fallback to standard pickle loading
+        try:
+            with open(file_path, "rb") as f:
+                data = pickle.load(f)
+            logger.info(f"Successfully loaded data from {file_path} using standard loader")
+            return data
+        except FileNotFoundError:
+            logger.error(f"File not found: {file_path}")
+            raise
+        except pickle.PickleError as e:
+            logger.error(f"Failed to unpickle file {file_path}: {e}")
+            raise
 
 
 def save_pickle(file_path: str, data: Any) -> None:

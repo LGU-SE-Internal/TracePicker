@@ -14,11 +14,27 @@ from ..algorithms.input_schema import TracingConfig
 from ..core.tracepicker import TracePicker
 from ..preprocessing.data_preprocessor import preprocess_raw_data
 from ..utils.new_data_loader import load_and_convert_traces
-from ..utils.result_saver import TracepickerResultSaver
 
 
 class TracesAdapter:
-    """Adapter for TracePicker to work with rcabench platform."""
+    """Platform adapter for TracePicker algorithm integration."""
+
+import time
+from datetime import datetime
+from pathlib import Path
+from typing import Any, Dict, List, Optional
+
+from rcabench_platform.v2.logging import logger
+
+from ..core.tracepicker import TracePicker
+from ..utils.legacy_loader import load_pickle_traces
+from ..utils.new_data_loader import load_and_convert_traces
+from ..utils.result_saver import TracePickerResultSaver
+from .input_schema import TracingConfig, TracingInput, TracingResult
+
+
+class TracesAdapter:
+    """Adapter for running TracePicker on different data sources."""
 
     def __init__(
         self,
@@ -79,22 +95,6 @@ class TracesAdapter:
                     "processing_time": 0.0,
                 }
 
-            # Analyze trace distribution by time if possible
-            total_traces = len(traces)
-            normal_count = 0
-            abnormal_count = 0
-
-            # Count normal vs abnormal traces based on trace.abnormal flag
-            for trace in traces:
-                if trace.abnormal:
-                    abnormal_count += 1
-                else:
-                    normal_count += 1
-
-            logger.info(
-                f"Loaded {total_traces} traces: {normal_count} normal, {abnormal_count} abnormal"
-            )
-
             # Preprocess traces
             tracing_input = preprocess_raw_data(traces, self.config)
 
@@ -102,61 +102,12 @@ class TracesAdapter:
             picker = TracePicker(self.config)
             result = picker.process_traces(tracing_input)
 
-            # Analyze sampled trace distribution
-            sampled_normal = 0
-            sampled_abnormal = 0
-            sampled_trace_objects = [
-                t for t in traces if t.trace_id in result.sampled_trace_ids
-            ]
-
-            for trace in sampled_trace_objects:
-                if trace.abnormal:
-                    sampled_abnormal += 1
-                else:
-                    sampled_normal += 1
-
-            # Create comprehensive statistics
-            stats = {
-                "total_traces_loaded": total_traces,
-                "normal_traces_loaded": normal_count,
-                "abnormal_traces_loaded": abnormal_count,
-                "total_traces_processed": result.total_traces,
-                "sampled_traces": result.sampled_traces,
-                "sampled_normal": sampled_normal,
-                "sampled_abnormal": sampled_abnormal,
-                "sampling_ratio": result.sampling_ratio,
-                "normal_sampling_rate": sampled_normal / normal_count
-                if normal_count > 0
-                else 0,
-                "abnormal_sampling_rate": sampled_abnormal / abnormal_count
-                if abnormal_count > 0
-                else 0,
-                "processing_time": result.total_time,
-                "encoding_time": result.encoding_time,
-                "sampling_time": result.sampling_time,
-                "other_time": result.other_time,
-                "algorithm_metadata": result.metadata,
-            }
-
             logger.info(
-                f"TracePicker completed: sampled {result.sampled_traces}/{result.total_traces} traces "
-                f"(normal: {sampled_normal}, abnormal: {sampled_abnormal})"
+                f"TracePicker completed: sampled {result.sampled_traces}/{result.total_traces} traces"
             )
-
-            # Try to save results (optional, won't fail if it doesn't work)
-            try:
-                result_saver = TracepickerResultSaver(data_folder)
-                output_dir = result_saver.save_results(result.sampled_trace_ids, stats)
-                stats["output_directory"] = str(output_dir)
-                logger.info(f"Results saved to: {output_dir}")
-            except Exception as save_error:
-                logger.warning(f"Could not save results: {save_error}")
-                stats["save_error"] = str(save_error)
 
             return {
                 "sampled_trace_ids": result.sampled_trace_ids,
-                "statistics": stats,
-                # Legacy fields for compatibility
                 "total_traces": result.total_traces,
                 "sampled_traces": result.sampled_traces,
                 "sampling_ratio": result.sampling_ratio,
@@ -182,6 +133,7 @@ def tracepicker_algorithm(
     pool_height: int = 1000,
     combination_count: int = 100,
     seed: int = 42,
+    save_results: bool = True,
 ) -> dict:
     """Standalone TracePicker function.
 

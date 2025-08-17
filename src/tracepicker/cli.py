@@ -105,16 +105,70 @@ def run(
         results_table.add_column("Metric", style="cyan")
         results_table.add_column("Value", style="green")
 
-        results_table.add_row("Total Traces", str(result["total_traces"]))
+        # Get statistics if available
+        stats = result.get("statistics", {})
+
+        # Basic results
+        results_table.add_row(
+            "Total Traces Loaded",
+            str(stats.get("total_traces_loaded", result["total_traces"])),
+        )
+        results_table.add_row(
+            "  - Normal Traces", str(stats.get("normal_traces_loaded", "N/A"))
+        )
+        results_table.add_row(
+            "  - Abnormal Traces", str(stats.get("abnormal_traces_loaded", "N/A"))
+        )
+        results_table.add_row("", "")  # Separator
+
         results_table.add_row("Sampled Traces", str(result["sampled_traces"]))
+        results_table.add_row(
+            "  - Normal Sampled", str(stats.get("sampled_normal", "N/A"))
+        )
+        results_table.add_row(
+            "  - Abnormal Sampled", str(stats.get("sampled_abnormal", "N/A"))
+        )
+        results_table.add_row("", "")  # Separator
+
         results_table.add_row("Sampling Ratio", f"{result['sampling_ratio']:.3f}")
-        results_table.add_row("Abnormal Traces", str(result["abnormal_traces"]))
+        if stats.get("normal_sampling_rate") is not None:
+            results_table.add_row(
+                "  - Normal Rate", f"{stats['normal_sampling_rate']:.3f}"
+            )
+        if stats.get("abnormal_sampling_rate") is not None:
+            results_table.add_row(
+                "  - Abnormal Rate", f"{stats['abnormal_sampling_rate']:.3f}"
+            )
+        results_table.add_row("", "")  # Separator
+
+        # Performance metrics
         results_table.add_row("Processing Time", f"{result['processing_time']:.3f}s")
         results_table.add_row("  - Encoding", f"{result['encoding_time']:.3f}s")
         results_table.add_row("  - Sampling", f"{result['sampling_time']:.3f}s")
         results_table.add_row("  - Other", f"{result['other_time']:.3f}s")
 
+        # Output location if available
+        if stats.get("output_directory"):
+            results_table.add_row("", "")  # Separator
+            results_table.add_row("Output Directory", str(stats["output_directory"]))
+
         console.print(results_table)
+
+        # Show sampling validation
+        sampled_normal = stats.get("sampled_normal", 0)
+        sampled_abnormal = stats.get("sampled_abnormal", 0)
+
+        if sampled_normal > 0 and sampled_abnormal > 0:
+            console.print(
+                "\n✅ Successfully sampled both normal and abnormal traces",
+                style="green",
+            )
+        elif sampled_normal > 0:
+            console.print("\n⚠️  Only normal traces were sampled", style="yellow")
+        elif sampled_abnormal > 0:
+            console.print("\n⚠️  Only abnormal traces were sampled", style="yellow")
+        else:
+            console.print("\n❌ No traces were sampled", style="red")
 
         # Save results
         save_results(result, output_folder, data_folder.name)

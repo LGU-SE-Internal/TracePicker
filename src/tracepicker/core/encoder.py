@@ -122,8 +122,13 @@ class BFSEncoder:
         # Combine anomaly indicators
         is_abnormal = is_error or is_performance_degraded
 
+        # Collect statistics
+        processed_count = len(processed_spans)
+        failed_count = len(trace.spans) - processed_count
+
         logger.debug(
             f"Built tree for trace {trace.trace_id}: "
+            f"nodes={tree.size()}, processed={processed_count}, failed={failed_count}, "
             f"error={is_error}, perf_degraded={is_performance_degraded}"
         )
 

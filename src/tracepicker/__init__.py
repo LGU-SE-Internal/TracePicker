@@ -34,6 +34,10 @@ def __getattr__(name):
         from .algorithms.platform_adapter import tracepicker_algorithm
 
         return tracepicker_algorithm
+    elif name == "TracepickerResultSaver":
+        from .utils.result_saver import TracepickerResultSaver
+
+        return TracepickerResultSaver
     raise AttributeError(f"module '{__name__}' has no attribute '{name}'")
 
 
@@ -45,4 +49,5 @@ __all__ = [
     "TracingConfig",
     "TracePickerAlgorithm",
     "tracepicker_algorithm",
+    "TracepickerResultSaver",
 ]

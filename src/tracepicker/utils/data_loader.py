@@ -183,8 +183,6 @@ def load_traces_data(input_folder: Path) -> pl.LazyFrame:
     anomal_traces = pl.scan_parquet(abnormal_traces_path)
     lf = merge_two_time_ranges(normal_traces, anomal_traces)
 
-    lf = tt_add_op_name(lf)
-
     status_code_values = ["Unset", "Ok", "Error"]
     lf = lf.with_columns(
         replace_enum_values("attr.status_code", status_code_values, start=0),
@@ -201,6 +199,7 @@ def load_traces_data(input_folder: Path) -> pl.LazyFrame:
     df = lf.collect()
     df = ui_span_name_parser(df)
     lf = df.lazy()
+    lf = tt_add_op_name(lf)
 
     return lf
 
@@ -257,15 +256,6 @@ def polars_to_traces(df: pl.DataFrame) -> List[Trace]:
                 if parent_span_id == "null" or parent_span_id == "":
                     parent_span_id = ""
 
-            # Debug logging for problematic traces
-            if str(actual_trace_id) in [
-                "9e08a3d2697dc074f5c9cf139949cc92",
-                "43f2a664cfcee2427c2f43619b8327c4",
-            ]:
-                logger.debug(
-                    f"Trace {actual_trace_id}, Span {row['span_id']}: "
-                    f"original_parent='{original_parent_id}' -> processed_parent='{parent_span_id}'"
-                )
 
             span = Span(
                 start_time=start_time,

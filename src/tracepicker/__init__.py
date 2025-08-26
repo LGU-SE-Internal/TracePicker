@@ -42,6 +42,10 @@ def __getattr__(name):
         from .utils.result_saver import TracepickerResultSaver
 
         return TracepickerResultSaver
+    elif name == "TracePickerSampler":
+        from .samplers.tracepicker_sampler import TracePickerSampler
+
+        return TracePickerSampler
     raise AttributeError(f"module '{__name__}' has no attribute '{name}'")
 
 
@@ -55,4 +59,5 @@ __all__ = [
     "TracePickerAdapter",
     "run_tracepicker",
     "ResultSaver",
+    "TracePickerSampler",
 ]

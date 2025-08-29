@@ -123,27 +123,6 @@ def merge_two_time_ranges(normal: pl.LazyFrame, anomal: pl.LazyFrame) -> pl.Lazy
     return merged
 
 
-def ui_span_name_parser(df: pl.DataFrame) -> pl.DataFrame:
-    """Parse UI dashboard span names by replacing with child span names."""
-    # Create a mapping from parent span ID to child span name
-    child_mapping = df.select(["parent_span_id", "span_name"]).rename(
-        {"parent_span_id": "span_id", "span_name": "child_span_name"}
-    )
-
-    # Join with original dataframe
-    merged_df = df.join(child_mapping, on="span_id", how="left")
-
-    # Replace span names for ts-ui-dashboard service with child span names
-    processed_df = merged_df.with_columns(
-        pl.when(pl.col("service_name") == "ts-ui-dashboard")
-        .then(pl.col("child_span_name"))
-        .otherwise(pl.col("span_name"))
-        .alias("span_name")
-    ).drop("child_span_name")
-
-    return processed_df
-
-
 @timeit()
 def load_traces_data(input_folder: Path) -> pl.LazyFrame:
     """Load traces data from parquet files."""
@@ -195,10 +174,6 @@ def load_traces_data(input_folder: Path) -> pl.LazyFrame:
         pl.col("attr.http.response.content_length").cast(pl.Float64).fill_null(0),
     )
 
-    # Apply UI span name parsing
-    df = lf.collect()
-    df = ui_span_name_parser(df)
-    lf = df.lazy()
     lf = tt_add_op_name(lf)
 
     return lf

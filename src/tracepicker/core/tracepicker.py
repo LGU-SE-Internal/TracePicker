@@ -100,6 +100,73 @@ class TracePicker:
 
         return result
 
+    def process_traces_preserve_state(
+        self, tracing_input: TracingInput
+    ) -> TracingResult:
+        """Process a batch of traces while preserving internal state for multi-batch processing.
+
+        This method is designed for offline mode where we need to maintain
+        path statistics and abnormal type tracking across multiple batches.
+
+        Args:
+            tracing_input: Input data containing traces and configuration
+
+        Returns:
+            TracingResult with sampled trace IDs and performance metrics
+        """
+        logger.info(f"Processing {tracing_input.trace_count} traces (preserving state)")
+
+        # Initialize tracking variables
+        sampled_trace_ids = []
+        total_encoding_time = 0.0
+        total_sampling_time = 0.0
+        total_other_time = 0.0
+        abnormal_count = 0
+
+        # Process traces one by one
+        for i, trace in enumerate(tracing_input.traces):
+            is_final_trace = i == len(tracing_input.traces) - 1
+
+            # Process single trace
+            trace_sampled_ids, encode_time, sample_time, other_time = (
+                self._process_single_trace(trace, is_final_trace)
+            )
+
+            # Accumulate results
+            sampled_trace_ids.extend(trace_sampled_ids)
+            total_encoding_time += encode_time
+            total_sampling_time += sample_time
+            total_other_time += other_time
+
+            if trace.abnormal:
+                abnormal_count += 1
+
+        # Create result (note: we preserve state, so path_counter and abnormal_types are cumulative)
+        result = TracingResult(
+            sampled_trace_ids=sampled_trace_ids,
+            encoding_time=total_encoding_time,
+            sampling_time=total_sampling_time,
+            other_time=total_other_time,
+            total_traces=tracing_input.trace_count,
+            sampled_traces=len(sampled_trace_ids),
+            abnormal_traces=abnormal_count,
+            metadata={
+                "config": tracing_input.config,
+                "path_statistics": dict(self.path_counter),
+                "abnormal_types": self.abnormal_types.copy(),
+                "preserve_state": True,  # Indicate this was processed with state preservation
+            },
+        )
+
+        logger.info(
+            f"Batch processing completed. Sampled {len(sampled_trace_ids)} out of "
+            f"{tracing_input.trace_count} traces "
+            f"(ratio: {result.sampling_ratio:.3f}). "
+            f"Cumulative path statistics: {len(self.path_counter)} unique paths"
+        )
+
+        return result
+
     def _process_single_trace(
         self, trace: Trace, is_final: bool
     ) -> Tuple[List[str], float, float, float]:

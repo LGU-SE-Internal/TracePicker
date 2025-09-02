@@ -1,5 +1,5 @@
 # TracePicker
-python ./main.py sample batch -s tracepicker -d rcabench_sampler_filtered --rate 0.001 --rate 0.005 --rate 0.01 --rate 0.05 --rate 0.1 --mode online --mode o --clear --no-skip-finished
+python ./main.py sample batch -s tracepicker -d rcabench_sampler_filtered 0.1 --mode online --mode offline --clear --no-skip-finished
 python ./main.py sample batch -s tracepicker -d rcabench_sampler_filtered --rate 0.001 --rate 0.005 --rate 0.01 --rate 0.05 --rate 0.1 --mode offline --mode o --clear --no-skip-finished
 TracePicker is an intelligent trace sampling framework for distributed systems that uses machine learning and optimization techniques to select representative traces while maintaining statistical properties of the original trace distribution.
 

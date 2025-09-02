@@ -43,7 +43,7 @@ class TracePickerSampler(TraceSampler):
 
     def needs_cpu_count(self) -> Optional[int]:
         """Return number of CPU cores needed."""
-        return 1
+        return 2
 
     def reset_offline_state(self):
         """Reset offline mode tracking state."""
